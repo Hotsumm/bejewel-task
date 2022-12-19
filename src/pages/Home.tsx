@@ -17,6 +17,9 @@ export default function Home() {
     <Container>
       <TitleWrap>
         <h3>상품 리스트</h3>
+        <UploadLinkWrap>
+          <SLink to="/product-upload">상품 등록하기</SLink>
+        </UploadLinkWrap>
       </TitleWrap>
       <ProductsWrap>
         {isError && <p>Something went wrong!...</p>}
@@ -46,12 +49,21 @@ const Container = styled.div`
 const TitleWrap = styled.div`
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   margin-bottom: 30px;
   h3 {
     font-size: 22px;
     font-weight: 700;
   }
+`;
+
+const UploadLinkWrap = styled.div``;
+
+const SLink = styled(Link)`
+  color: rgb(98, 0, 240);
+  border: 1px solid rgb(98, 0, 240);
+  border-radius: 10px;
+  padding: 15px 10px;
 `;
 
 const ProductsWrap = styled.div`

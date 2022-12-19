@@ -16,3 +16,9 @@ export async function getProductById(id: string): Promise<Product> {
 
   return data;
 }
+
+export async function postProduct(formData: Product): Promise<Product> {
+  const { data } = await axiosInstance.post(`${BASE_URL}/products`, formData);
+
+  return data;
+}
