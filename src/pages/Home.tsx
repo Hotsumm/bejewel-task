@@ -1,6 +1,8 @@
 import styled from 'styled-components';
-import { getAllProducts } from '../api/productApi';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+
+import { getAllProducts } from '../api/productApi';
 import { queryKeys } from '../react-query/constants';
 import ProductCard from '../components/product/ProductCard';
 
@@ -19,10 +21,16 @@ export default function Home() {
       <ProductsWrap>
         {isError && <p>Something went wrong!...</p>}
         {!isError && isLoading && <p>Loading...</p>}
+        {!isError && !isLoading && products.length === 0 && (
+          <p>The product does not exist.</p>
+        )}
         <Products>
           {products &&
+            products.length > 0 &&
             products.map((product) => (
-              <ProductCard key={product.id} productData={product} />
+              <Link key={product.id} to={`product/${product.id}`}>
+                <ProductCard productData={product} />
+              </Link>
             ))}
         </Products>
       </ProductsWrap>
