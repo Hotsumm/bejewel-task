@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import styled from 'styled-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 
+import { Product } from '../types/product';
 import { queryKeys } from '../react-query/constants';
-import { getProductById } from '../api/productApi';
+import { getProductById, deleteProductById } from '../api/productApi';
+import ProductEditModal from '../components/product/ProductEditModal';
 
 export default function ProductDetail() {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const { productId } = useParams() as { productId: string };
   const navigate = useNavigate();
 
@@ -16,12 +19,40 @@ export default function ProductDetail() {
     () => getProductById(productId)
   );
 
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation(
+    (productId: number) => deleteProductById(productId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries([queryKeys.products]);
+        queryClient.setQueriesData<Product[]>([queryKeys.products], (oldData) =>
+          oldData
+            ? oldData.filter((data) => data.id !== Number(productId))
+            : oldData
+        );
+        alert('상품이 삭제 되었습니다.');
+        navigate('/');
+      },
+    }
+  );
+
+  function handleToggleModal() {
+    setIsEdit((prev) => !prev);
+  }
+
   function handleClickimages(index: number) {
     setSelectedIndex(index);
   }
 
   function handleClickBackButton() {
     navigate(-1);
+  }
+
+  function handleDeleteProduct() {
+    const answer = window.confirm('상품을 삭제하시겠습니까?');
+    if (!answer) return;
+    if (!product) return;
+    mutate(Number(product.id));
   }
 
   if (isLoading) return <p>Loading...</p>;
@@ -77,10 +108,20 @@ export default function ProductDetail() {
                 <p>설명</p>
                 <p>{product.description}</p>
               </Description>
+              <ButtonWrap>
+                <button onClick={handleToggleModal}>상품수정</button>
+                <button onClick={handleDeleteProduct}>상품삭제</button>
+              </ButtonWrap>
             </InfoWrap>
           </Content>
         )}
       </Wrapper>
+      {isEdit && product && (
+        <ProductEditModal
+          handleToggleModal={handleToggleModal}
+          product={product}
+        />
+      )}
     </Container>
   );
 }
@@ -121,6 +162,7 @@ const Content = styled.div`
   display: flex;
   justify-content: center;
 `;
+
 const ImagesWrap = styled.div`
   width: 60%;
   display: flex;
@@ -212,12 +254,29 @@ const Price = styled.div`
 
 const Description = styled.div`
   width: 100%;
+  margin-bottom: 30px;
   p {
     font-size: 16px;
     :first-child {
       font-weight: 700;
       font-size: 18px;
       margin-bottom: 20px;
+    }
+  }
+`;
+
+const ButtonWrap = styled.div`
+  display: flex;
+  gap: 0 20px;
+  button {
+    color: rgb(98, 0, 240);
+    border: 1px solid rgb(98, 0, 240);
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-top: 20px;
+    :last-child {
+      color: red;
+      border: 1px solid red;
     }
   }
 `;

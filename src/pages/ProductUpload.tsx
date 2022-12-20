@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Product } from '../types/product';
+import { Product, PartialBy } from '../types/product';
 
 import { queryKeys } from '../react-query/constants';
 import { postProduct } from '../api/productApi';
 import { useNavigate } from 'react-router-dom';
+import ProductForm from '../components/product/ProductForm';
 
 const DUMMY_THUMBNAIL = 'https://i.dummyjson.com/data/products/1/thumbnail.jpg';
 const DUMMY_IMAGES = [
@@ -28,24 +29,28 @@ const defaultFormData = {
 };
 
 export default function ProductUpload() {
-  const [formData, setFormData] = useState<Product>(defaultFormData);
+  const [formData, setFormData] =
+    useState<PartialBy<Product, 'id'>>(defaultFormData);
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [subImagesPreview, setSubImagesPreview] = useState<string[]>([]);
 
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
-  const { mutate } = useMutation((formData: Product) => postProduct(formData), {
-    onSuccess: (data: Product) => {
-      queryClient.invalidateQueries([queryKeys.products]);
-      queryClient.setQueriesData<Product[]>([queryKeys.products], (oldData) =>
-        oldData ? [...oldData, data] : oldData
-      );
+  const { mutate } = useMutation(
+    (formData: PartialBy<Product, 'id'>) => postProduct(formData),
+    {
+      onSuccess: (data: Product) => {
+        queryClient.invalidateQueries([queryKeys.products]);
+        queryClient.setQueriesData<Product[]>([queryKeys.products], (oldData) =>
+          oldData ? [...oldData, data] : oldData
+        );
 
-      alert('상품등록에 성공하였습니다.');
-      navigate(`/product/${data.id}`);
-    },
-  });
+        alert('상품등록에 성공하였습니다.');
+        navigate(`/product/${data.id}`);
+      },
+    }
+  );
 
   function handleFileChange(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -145,58 +150,11 @@ export default function ProductUpload() {
             )}
           </SubImageUploadWrap>
         </UploadWrap>
-        <Form onSubmit={handleSubmit}>
-          <InputWrap>
-            <p>카테고리</p>
-            <input
-              type="text"
-              required
-              onChange={handleChangeForm}
-              id="category"
-              value={formData.category}
-            />
-          </InputWrap>
-          <InputWrap>
-            <p>브랜드</p>
-            <input
-              type="text"
-              required
-              onChange={handleChangeForm}
-              id="brand"
-              value={formData.brand}
-            />
-          </InputWrap>
-          <InputWrap>
-            <p>상품이름</p>
-            <input
-              type="text"
-              required
-              onChange={handleChangeForm}
-              id="title"
-              value={formData.title}
-            />
-          </InputWrap>
-          <InputWrap>
-            <p>가격($)</p>
-            <input
-              type="number"
-              onChange={handleChangeForm}
-              min={1}
-              id="price"
-              value={formData.price}
-            />
-          </InputWrap>
-          <InputWrap>
-            <p>설명</p>
-            <textarea
-              required
-              onChange={handleChangeForm}
-              id="description"
-              value={formData.description}
-            />
-          </InputWrap>
-          <UploadButton type="submit">등록하기</UploadButton>
-        </Form>
+        <ProductForm
+          formData={formData}
+          handleSubmit={handleSubmit}
+          handleChangeForm={handleChangeForm}
+        />
       </Content>
     </Container>
   );
@@ -277,30 +235,4 @@ const LabelWrap = styled.div`
       opacity: 0.6;
     }
   }
-`;
-
-const Form = styled.form``;
-
-const InputWrap = styled.div`
-  & + & {
-    margin-top: 15px;
-  }
-  display: flex;
-  align-items: center;
-  gap: 0 10px;
-  p {
-    width: 75px;
-  }
-  input,
-  textarea {
-    border: 1px solid #dbdbdb;
-    padding: 5px;
-  }
-`;
-const UploadButton = styled.button`
-  color: rgb(98, 0, 240);
-  border: 1px solid rgb(98, 0, 240);
-  border-radius: 10px;
-  padding: 15px 20px;
-  margin-top: 20px;
 `;

@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { Product } from '../types/product';
+import { Product, PartialBy } from '../types/product';
 
 const BASE_URL = 'http://localhost:4000';
 const config: AxiosRequestConfig = { baseURL: BASE_URL };
@@ -17,8 +17,27 @@ export async function getProductById(id: string): Promise<Product> {
   return data;
 }
 
-export async function postProduct(formData: Product): Promise<Product> {
+export async function postProduct(
+  formData: PartialBy<Product, 'id'>
+): Promise<Product> {
   const { data } = await axiosInstance.post(`${BASE_URL}/products`, formData);
+  return data;
+}
 
+export async function patchProductById(
+  productId: number,
+  formData: Product
+): Promise<Product> {
+  const { data } = await axiosInstance.patch(
+    `${BASE_URL}/products/${productId}`,
+    formData
+  );
+  return data;
+}
+
+export async function deleteProductById(productId: number): Promise<Product> {
+  const { data } = await axiosInstance.delete(
+    `${BASE_URL}/products/${productId}`
+  );
   return data;
 }

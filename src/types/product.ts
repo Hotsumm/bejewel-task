@@ -1,5 +1,5 @@
 export type Product = {
-  id?: number;
+  id: number;
   title: string;
   description: string;
   price: number;
@@ -11,3 +11,5 @@ export type Product = {
   thumbnail: string;
   images: string[];
 };
+
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
