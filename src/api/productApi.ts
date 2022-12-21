@@ -1,13 +1,20 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { Product, PartialBy } from '../types/product';
 
-const BASE_URL = 'http://localhost:4000';
+const BASE_URL = 'http://localhost:40200';
 const config: AxiosRequestConfig = { baseURL: BASE_URL };
 
 export const axiosInstance = axios.create(config);
 
 export async function getAllProducts(): Promise<Product[]> {
   const { data } = await axiosInstance.get(`${BASE_URL}/products`);
+  return data;
+}
+
+export async function getProductsByPage(page: number): Promise<Product[]> {
+  const { data } = await axiosInstance.get(
+    `${BASE_URL}/products?_page=${page}&_limit=12`
+  );
   return data;
 }
 

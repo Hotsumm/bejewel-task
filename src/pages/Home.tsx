@@ -1,18 +1,9 @@
 import styled from 'styled-components';
-import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
-import { getAllProducts } from '../api/productApi';
-import { queryKeys } from '../react-query/constants';
-import ProductCard from '../components/product/ProductCard';
+import InfiniteProduct from '../components/product/InfiniteProduct';
 
 export default function Home() {
-  const {
-    isLoading,
-    isError,
-    data: products = [],
-  } = useQuery([queryKeys.products], getAllProducts);
-
   return (
     <Container>
       <TitleWrap>
@@ -21,22 +12,11 @@ export default function Home() {
           <SLink to="/product-upload">상품 등록하기</SLink>
         </UploadLinkWrap>
       </TitleWrap>
-      <ProductsWrap>
-        {isError && <p>Something went wrong!...</p>}
-        {!isError && isLoading && <p>Loading...</p>}
-        {!isError && !isLoading && products.length === 0 && (
-          <p>The product does not exist.</p>
-        )}
-        <Products>
-          {products &&
-            products.length > 0 &&
-            products.map((product) => (
-              <Link key={product.id} to={`product/${product.id}`}>
-                <ProductCard productData={product} />
-              </Link>
-            ))}
-        </Products>
-      </ProductsWrap>
+      <Content>
+        <ProductsWrap>
+          <InfiniteProduct />
+        </ProductsWrap>
+      </Content>
     </Container>
   );
 }
@@ -66,12 +46,11 @@ const SLink = styled(Link)`
   padding: 15px 10px;
 `;
 
-const ProductsWrap = styled.div`
+const Content = styled.div`
   width: 100%;
 `;
 
-const Products = styled.ul`
-  display: grid;
-  grid-template-columns: repeat(4, calc((100% - 32px) / 4));
-  gap: 140px 16px;
+const ProductsWrap = styled.div`
+  width: 100%;
+  padding-bottom: 20px;
 `;
